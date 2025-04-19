@@ -5,7 +5,7 @@ set -euo pipefail
 #
 # Usage:
 #   chmod +x 2-setup_user.sh
-#   ./2-setup_user.sh --server-ip IP [--ssh-port PORT] [--ssh-key-path PATH] [--rollback]
+#   ./2-setup_user.sh --server-ip IP [--ssh-port PORT] [--ssh-key-path PATH] [--rollback] [-h | --help]
 #
 # Required:
 #   --server-ip      IP address
@@ -18,7 +18,7 @@ set -euo pipefail
 print_usage() {
   cat <<EOF
 Usage:
-  $0 --server-ip IP [--ssh-port PORT] [--ssh-key-path PATH] [--rollback]
+  $0 --server-ip IP [--ssh-port PORT] [--ssh-key-path PATH] [--rollback] [-h | --help]
 
 Required:
   --server-ip    Server IP address or hostname
@@ -27,6 +27,9 @@ Optional:
   --ssh-port     SSH port (default: \$SSH_PORT or 22)
   --ssh-key-path Path to your private SSH key (default: \$SSH_KEY_PATH or ~/.ssh/id_rsa)
   --rollback     Removes user 'deploy', sudoers, and reverts SSH settings
+
+Options:
+  -h, --help     Show this help and exit
 
 Examples:
   $0 --server-ip 1.2.3.4
@@ -91,9 +94,9 @@ if [ "$ROLLBACK" = true ]; then
   echo "🔑 Attempting SSH config restore as deploy@$SERVER_IP (rollback=true)"
   if ssh "${SSH_OPTS[@]}" deploy@"$SERVER_IP" bash <<'EOF'
     set -e
-    echo "⟳ Backing up SSH config…"
+    echo "✍🏻 Backing up SSH config…"
     sudo test -f /etc/ssh/sshd_config.bak || sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak && echo "   - sshd_config backed up"
-    echo "⟳ Restoring SSH config…"
+    echo "✍🏻 Restoring SSH config…"
     # Enable root login
     grep -q '^PermitRootLogin yes' /etc/ssh/sshd_config \
       || sudo sed -i 's/^#*PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config && echo "   - PermitRootLogin yes"
@@ -111,17 +114,22 @@ EOF
   echo "🔑 Reconnecting as root@$SERVER_IP"
   if ssh "${SSH_OPTS[@]}" root@"$SERVER_IP" bash <<'EOF'
     set -e
-    echo "⟳ Removing sudoers file…"
+    echo "✍🏻 Removing sudoers file…"
     if [ -f /etc/sudoers.d/deploy ]; then
       sudo rm -f /etc/sudoers.d/deploy && echo "   - /etc/sudoers.d/deploy removed"
     else
       echo "   - no sudoers file to remove"
     fi
 
-    echo "⟳ Killing remaining processes for deploy…"
-    sudo pkill -u deploy || echo "   - no processes found"
+    echo "✍🏻 Killing remaining processes for deploy…"
+    if id deploy &>/dev/null; then
+      sudo pkill -u deploy && echo "   - processes killed" \
+        || echo "   - no processes found"
+    else
+      echo "   - user 'deploy' does not exist, skipping"
+    fi
 
-    echo "⟳ Deleting deploy user…"
+    echo "✍🏻 Deleting deploy user…"
     if id deploy &>/dev/null; then
       if command -v deluser &>/dev/null; then
         sudo deluser --remove-home deploy && echo "   - deploy user removed"
@@ -145,7 +153,7 @@ fi
 if ssh "${SSH_OPTS[@]}" "$REMOTE_USER@$SERVER_IP" bash <<'EOF'
   set -e
 
-  echo "⟳ Creating deploy user…"
+  echo "✍🏻 Creating deploy user…"
   if ! id deploy &>/dev/null; then
     if command -v adduser &>/dev/null; then
       sudo adduser --disabled-password --gecos "" deploy && echo "   - user 'deploy' created"
@@ -157,7 +165,7 @@ if ssh "${SSH_OPTS[@]}" "$REMOTE_USER@$SERVER_IP" bash <<'EOF'
     echo "   - user 'deploy' already exists"
   fi
 
-  echo "⟳ Configuring passwordless sudo…"
+  echo "✍🏻 Configuring passwordless sudo…"
   if [ ! -f /etc/sudoers.d/deploy ]; then
     echo 'deploy ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/deploy \
       && sudo chmod 440 /etc/sudoers.d/deploy \
@@ -166,17 +174,17 @@ if ssh "${SSH_OPTS[@]}" "$REMOTE_USER@$SERVER_IP" bash <<'EOF'
     echo "   - sudoers entry exists"
   fi
 
-  echo "⟳ Backing up SSH config…"
+  echo "✍🏻 Backing up SSH config…"
   sudo test -f /etc/ssh/sshd_config.bak || sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak && echo "   - sshd_config backed up"
 
-  echo "⟳ Hardening SSH…"
+  echo "✍🏻 Hardening SSH…"
   grep -q '^PermitRootLogin no' /etc/ssh/sshd_config \
     || sudo sed -i 's/^#*PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config && echo "   - PermitRootLogin no"
   grep -q '^PasswordAuthentication no' /etc/ssh/sshd_config \
     || sudo sed -i 's/^#*PasswordAuthentication .*/PasswordAuthentication no/' /etc/ssh/sshd_config && echo "   - PasswordAuthentication no"
   sudo systemctl restart sshd && echo "   - sshd restarted"
 
-  echo "⟳ Installing SSH keys for deploy…"
+  echo "✍🏻 Installing SSH keys for deploy…"
   if [ ! -f /home/deploy/.ssh/authorized_keys ]; then
     sudo mkdir -p /home/deploy/.ssh
     sudo cp /root/.ssh/authorized_keys /home/deploy/.ssh/authorized_keys

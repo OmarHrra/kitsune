@@ -5,7 +5,7 @@ set -euo pipefail
 #
 # Usage:
 #   chmod +x 3-setup_firewall.sh
-#   ./3-setup_firewall.sh --server-ip 1.2.3.4 [--ssh-port 2222] [--ssh-key-path ~/.ssh/id_rsa] [--rollback]
+#   ./3-setup_firewall.sh --server-ip 1.2.3.4 [--ssh-port 2222] [--ssh-key-path ~/.ssh/id_rsa] [--rollback] [-h | --help]
 #
 # Required:
 #   --server-ip      IP address
@@ -18,7 +18,7 @@ set -euo pipefail
 print_usage() {
   cat <<EOF
 Usage:
-  $0 --server-ip IP [--ssh-port PORT] [--ssh-key-path PATH] [--rollback]
+  $0 --server-ip IP [--ssh-port PORT] [--ssh-key-path PATH] [--rollback] [-h | --help]
 
 Required:
   --server-ip      Server IP address or hostname
@@ -27,6 +27,9 @@ Optional:
   --ssh-port       SSH port (default: \$SSH_PORT or 22)
   --ssh-key-path   Path to your private SSH key (default: \$SSH_KEY_PATH or ~/.ssh/id_rsa)
   --rollback       Disable firewall and remove the rules
+
+Options:
+  -h, --help       Show this help and exit
 
 Examples:
   $0 --server-ip 1.2.3.4
@@ -82,7 +85,7 @@ if [ "$ROLLBACK" = true ]; then
   if ssh "${SSH_OPTS[@]}" deploy@"$SERVER_IP" bash <<EOF
     set -e
 
-    echo "⟳ Removing UFW rules…"
+    echo "✍🏻 Removing UFW rules…"
     delete_rule() {
       local rule="\$1"
       if sudo ufw status | grep -q "\$rule"; then
@@ -95,7 +98,7 @@ if [ "$ROLLBACK" = true ]; then
     delete_rule "80/tcp"
     delete_rule "443/tcp"
 
-    echo "⟳ Disabling UFW if active…"
+    echo "✍🏻 Disabling UFW if active…"
     if sudo ufw status | grep -q "Status: inactive"; then
       echo "   - UFW is already inactive"
     else
@@ -117,7 +120,7 @@ echo "🔑 Connecting as deploy@$SERVER_IP for SETUP"
 if ssh "${SSH_OPTS[@]}" deploy@"$SERVER_IP" bash <<EOF
   set -e
 
-  echo "⟳ Updating repositories and ensuring UFW is installed…"
+  echo "✍🏻 Updating repositories and ensuring UFW is installed…"
   if ! dpkg -l | grep -q ufw; then
     sudo apt-get update -y
     sudo apt-get install -y ufw && echo "   - ufw installed"
@@ -125,7 +128,7 @@ if ssh "${SSH_OPTS[@]}" deploy@"$SERVER_IP" bash <<EOF
     echo "   - ufw is already installed"
   fi
 
-  echo "⟳ Configuring UFW rules…"
+  echo "✍🏻 Configuring UFW rules…"
   add_rule() {
     local rule="\$1"
     if ! sudo ufw status | grep -q "\$rule"; then
@@ -138,14 +141,14 @@ if ssh "${SSH_OPTS[@]}" deploy@"$SERVER_IP" bash <<EOF
   add_rule "80/tcp"
   add_rule "443/tcp"
 
-  echo "⟳ Enabling UFW logging…"
+  echo "✍🏻 Enabling UFW logging…"
   if ! sudo ufw status verbose | grep -q "Logging: on"; then
     sudo ufw logging on >/dev/null 2>&1 && echo "   - logging enabled"
   else
     echo "   - logging was already enabled"
   fi
 
-  echo "⟳ Enabling UFW…"
+  echo "✍🏻 Enabling UFW…"
   if sudo ufw status | grep -q "Status: inactive"; then
     sudo ufw --force enable >/dev/null 2>&1 && echo "   - UFW enabled"
   else

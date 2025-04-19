@@ -5,7 +5,7 @@ set -euo pipefail
 #
 # Usage:
 #   chmod +x 4-setup_unattended.sh
-#   ./4-setup_unattended.sh --server-ip IP [--ssh-port PORT] [--ssh-key-path PATH] [--rollback]
+#   ./4-setup_unattended.sh --server-ip IP [--ssh-port PORT] [--ssh-key-path PATH] [--rollback] [-h | --help]
 #
 # Required:
 #   --server-ip      IP address or hostname
@@ -18,7 +18,7 @@ set -euo pipefail
 print_usage() {
   cat <<EOF
 Usage:
-  $0 --server-ip IP [--ssh-port PORT] [--ssh-key-path PATH] [--rollback]
+  $0 --server-ip IP [--ssh-port PORT] [--ssh-key-path PATH] [--rollback] [-h | --help]
 
 Required:
   --server-ip      Server IP address or hostname
@@ -27,6 +27,9 @@ Optional:
   --ssh-port       SSH port (default: \$SSH_PORT or 22)
   --ssh-key-path   Path to your private SSH key (default: \$SSH_KEY_PATH or ~/.ssh/id_rsa)
   --rollback       Revert unattended-upgrades configuration
+
+Options:
+  -h, --help       Show this help and exit
 
 Examples:
   $0 --server-ip 1.2.3.4
@@ -81,7 +84,7 @@ if [ "$ROLLBACK" = true ]; then
   if ssh "${SSH_OPTS[@]}" deploy@"$SERVER_IP" bash <<'EOF'
     set -e
 
-    echo "⟳ Reverting auto-upgrades config…"
+    echo "✍🏻 Reverting auto-upgrades config…"
     if [ -f /etc/apt/apt.conf.d/20auto-upgrades.bak ]; then
       sudo mv /etc/apt/apt.conf.d/20auto-upgrades.bak /etc/apt/apt.conf.d/20auto-upgrades \
         && echo "   - original config restored"
@@ -89,7 +92,7 @@ if [ "$ROLLBACK" = true ]; then
       echo "   - no config backup to restore"
     fi
 
-    echo "⟳ Stopping timers and service…"
+    echo "✍🏻 Stopping timers and service…"
     sudo systemctl stop apt-daily.timer apt-daily-upgrade.timer unattended-upgrades.service \
       && echo "   - timers and service stopped"
     sudo systemctl disable unattended-upgrades.service \
@@ -110,7 +113,7 @@ echo "🔑 Connecting as deploy@$SERVER_IP for SETUP"
 if ssh "${SSH_OPTS[@]}" deploy@"$SERVER_IP" bash <<'EOF'
   set -e
 
-  echo "⟳ Installing required packages…"
+  echo "✍🏻 Installing required packages…"
   if ! dpkg -l | grep -q "^ii  unattended-upgrades "; then
     sudo apt-get update -y
     sudo apt-get install -y unattended-upgrades apt-listchanges && echo "   - packages installed"
@@ -118,7 +121,7 @@ if ssh "${SSH_OPTS[@]}" deploy@"$SERVER_IP" bash <<'EOF'
     echo "   - packages already installed"
   fi
 
-  echo "⟳ Backing up existing auto-upgrades config…"
+  echo "✍🏻 Backing up existing auto-upgrades config…"
   if [ -f /etc/apt/apt.conf.d/20auto-upgrades ] && [ ! -f /etc/apt/apt.conf.d/20auto-upgrades.bak ]; then
     sudo cp /etc/apt/apt.conf.d/20auto-upgrades /etc/apt/apt.conf.d/20auto-upgrades.bak \
       && echo "   - original config backed up"
@@ -126,7 +129,7 @@ if ssh "${SSH_OPTS[@]}" deploy@"$SERVER_IP" bash <<'EOF'
     echo "   - backup already exists or no original config"
   fi
 
-  echo "⟳ Deploying auto-upgrades config…"
+  echo "✍🏻 Deploying auto-upgrades config…"
   sudo tee /etc/apt/apt.conf.d/20auto-upgrades > /dev/null <<UPGR
 APT::Periodic::Update-Package-Lists "1";
 APT::Periodic::Download-Upgradeable-Packages "1";
@@ -135,7 +138,7 @@ APT::Periodic::Unattended-Upgrade "1";
 UPGR
   echo "   - config applied"
 
-  echo "⟳ Enabling & restarting unattended-upgrades service…"
+  echo "✍🏻 Enabling & restarting unattended-upgrades service…"
   sudo systemctl enable unattended-upgrades.service >/dev/null 2>&1 && echo "   - service enabled"
   sudo systemctl restart unattended-upgrades.service && echo "   - service started"
 

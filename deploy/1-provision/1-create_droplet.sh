@@ -7,7 +7,7 @@ set -euo pipefail
 #
 # Usage:
 #   chmod +x 1-create_droplet.sh
-#   ./1-create_droplet.sh [--droplet-name NAME] [--region SLUG] [--size SLUG] [--image SLUG] [--tag TAG] [--rollback]
+#   ./1-create_droplet.sh [--droplet-name NAME] [--region SLUG] [--size SLUG] [--image SLUG] [--tag TAG] [--rollback] [-h | --help]
 #
 # Required:
 #   SSH_KEY_ID in .env or as env var (export SSH_KEY_ID=your-key-id)
@@ -34,7 +34,7 @@ print_usage() {
   cat <<EOF
 Usage:
   $0 [--droplet-name NAME] [--region SLUG] [--size SLUG]
-     [--image SLUG] [--tag TAG] [--rollback]
+     [--image SLUG] [--tag TAG] [--rollback] [-h | --help]
 
 Required:
   SSH_KEY_ID       must be set in .env or exported in your shell
@@ -103,7 +103,7 @@ existing=$(get_droplet_info || true)
 if [ "$ROLLBACK" = true ]; then
   if [ -n "$existing" ]; then
     droplet_id=$(awk '{print $1}' <<<"$existing")
-    echo "⟳ Deleting Droplet '$DROPLET_NAME' (ID: $droplet_id)..."
+    echo "✍🏻 Deleting Droplet '$DROPLET_NAME' (ID: $droplet_id)..."
     doctl compute droplet delete "$droplet_id" --force \
       && echo "✅ Droplet deleted" \
       || { echo "❌ Failed to delete droplet"; exit 1; }
@@ -122,7 +122,7 @@ if [ -n "$existing" ]; then
 fi
 
 # Create new droplet
-echo "⟳ Creating Droplet '$DROPLET_NAME'..."
+echo "✍🏻 Creating Droplet '$DROPLET_NAME'..."
 droplet_info=$(doctl compute droplet create "$DROPLET_NAME" \
   --region "$REGION" \
   --size "$SIZE" \
