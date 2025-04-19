@@ -31,7 +31,7 @@ Optional:
 Examples:
   $0 --server-ip 1.2.3.4
   $0 --server-ip 1.2.3.4 --ssh-port 2222
-  $0 --server-ip 1.2.3.4 --ssh-key-path ~/.ssh/do_key
+  $0 --server-ip 1.2.3.4 --ssh-key-path ~/.ssh/id_rsa
   $0 --server-ip 1.2.3.4 --rollback
 EOF
 }
