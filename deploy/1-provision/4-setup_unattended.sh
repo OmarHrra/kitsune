@@ -59,7 +59,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Validate required
+# Validate
 if [[ -z "${SERVER_IP:-}" ]]; then
   echo "❌ --server-ip is required" >&2
   exit 1
