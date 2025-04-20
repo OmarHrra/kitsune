@@ -5,13 +5,14 @@ set -euo pipefail
 #
 # Usage:
 #   chmod +x 1-setup_docker_prereqs.sh
-#   ./1-setup_docker_prereqs.sh --server-ip IP [--ssh-port PORT] [--rollback] [-h|--help]
+#   ./1-setup_docker_prereqs.sh --server-ip IP [--ssh-port PORT] [--ssh-key-path PATH] [--rollback] [-h|--help]
 #
 # Required:
 #   --server-ip      Server IP address or hostname
 #
 # Optional:
 #   --ssh-port       SSH port (default: $SSH_PORT or 22)
+#   --ssh-key-path   Path to your private SSH key (default: $SSH_KEY_PATH or ~/.ssh/id_rsa)
 #   --rollback       Remove packages installed by this script
 #
 # Options:
@@ -20,13 +21,14 @@ set -euo pipefail
 print_usage() {
   cat <<EOF
 Usage:
-  $0 --server-ip IP [--ssh-port PORT] [--rollback] [-h|--help]
+  $0 --server-ip IP [--ssh-port PORT] [--ssh-key-path PATH] [--rollback] [-h|--help]
 
 Required:
   --server-ip      Server IP address or hostname
 
 Optional:
   --ssh-port       SSH port (default: \$SSH_PORT or 22)
+  --ssh-key-path   Path to your private SSH key (default: \$SSH_KEY_PATH or ~/.ssh/id_rsa)
   --rollback       Remove packages installed by this script
 
 Options:
@@ -34,12 +36,13 @@ Options:
 EOF
 }
 
-# Load environment (for default SSH_PORT if set)
+# Load environment
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/load_env.sh"
 
 # Defaults
 SSH_PORT="${SSH_PORT:-22}"
+SSH_KEY_PATH="${SSH_KEY_PATH:-$HOME/.ssh/id_rsa}"
 ROLLBACK=false
 
 # Parse flags
@@ -47,10 +50,12 @@ if [ $# -eq 0 ]; then
   print_usage
   exit 1
 fi
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --server-ip)    SERVER_IP="$2";    shift 2 ;;  
     --ssh-port)     SSH_PORT="$2";     shift 2 ;;  
+    --ssh-key-path) SSH_KEY_PATH="$2"; shift 2 ;;  
     --rollback)     ROLLBACK=true;     shift   ;;  
     -h|--help)      print_usage; exit 0 ;;  
     *) echo "⚠️ Unknown parameter: $1" >&2; print_usage >&2; exit 1 ;;  
@@ -58,7 +63,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Validate
-if [ -z "$SERVER_IP" ]; then
+if [ -z "${SERVER_IP:-}" ]; then
   echo "❌ --server-ip is required" >&2
   exit 1
 fi
