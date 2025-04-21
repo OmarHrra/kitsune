@@ -11,16 +11,13 @@ Kitsune is a lightweight toolkit built with Bash scripts to **provision**, **con
 ## 📝 Content
 
 - [Prerequisites](#-prerequisites)
-- [`.env` File](#-env-file)
+- [.env File](#️-env-file)
 - [Scripts Structure](#-scripts-structure)
 - [Usage](#-usage)
-  - Individual execution
-  - Combined execution (`all.sh`)
+  - [Individual Execution](#individual-execution)
+  - [Combined Execution](#combined-execution)
 - [Rollback / Reversal](#-rollback--reversal)
-- [Dependencies](#-dependencies)
 - [Integration with Kamal](#-integration-with-kamal)
-- [Contributions](#-contributions)
-- [License](#-license)
 
 ---
 
