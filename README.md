@@ -1,6 +1,10 @@
-# DigitalOcean VPS Provisioning & Configuration
+# Kitsune 🦊
 
-This project brings together a set of Bash scripts to **provision**, **configure**, and **manage** a VPS server on DigitalOcean in a basic and fast way. It offers a simple environment for deploying web applications, optimized for use with [Kamal](https://github.com/basecamp/kamal). Each script is independent, allowing you to execute them individually or as a complete setup.
+<p align="center">
+  <img src="kitsune-logo.png" alt="Kitsune Logo" width="180"/>
+</p>
+
+Kitsune is a lightweight toolkit built with Bash scripts to **provision**, **configure**, and **manage** a VPS server on DigitalOcean. It offers a streamlined environment for deploying web applications, optimized for use with [Kamal](https://github.com/basecamp/kamal). Each script is modular and can be executed individually or as part of a complete setup.
 
 ---
 
