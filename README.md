@@ -59,7 +59,7 @@ SSH_PORT=22                 # Optional, default is 22
 ## 🗂️ Scripts Structure
 
 ```
-deploy/
+scripts/
 ├─ 1-provision/
 │  ├─ 1-create_droplet.sh
 │  ├─ 2-setup_user.sh
@@ -97,18 +97,18 @@ Each script can be run separately:
 
 ```bash
 # VPS Provisioning
-chmod +x deploy/1-provision/1-create_droplet.sh
-deploy/1-provision/1-create_droplet.sh --droplet-name my-app --region nyc1
+chmod +x scripts/1-provision/1-create_droplet.sh
+scripts/1-provision/1-create_droplet.sh --droplet-name my-app --region nyc1
 
 # User, firewall, or unattended configuration:
-deploy/1-provision/2-setup_user.sh --server-ip x.x.x.x
-deploy/1-provision/3-setup_firewall.sh --server-ip x.x.x.x
-deploy/1-provision/4-setup_unattended.sh --server-ip x.x.x.x
+scripts/1-provision/2-setup_user.sh --server-ip x.x.x.x
+scripts/1-provision/3-setup_firewall.sh --server-ip x.x.x.x
+scripts/1-provision/4-setup_unattended.sh --server-ip x.x.x.x
 
 # Docker configuration:
-deploy/2-docker/1-setup_docker_prereqs.sh --server-ip x.x.x.x
-deploy/2-docker/2-install_docker_engine.sh --server-ip x.x.x.x
-deploy/2-docker/3-postinstall_docker.sh --server-ip x.x.x.x
+scripts/2-docker/1-setup_docker_prereqs.sh --server-ip x.x.x.x
+scripts/2-docker/2-install_docker_engine.sh --server-ip x.x.x.x
+scripts/2-docker/3-postinstall_docker.sh --server-ip x.x.x.x
 ```
 
 ### Combined Execution
@@ -116,23 +116,23 @@ deploy/2-docker/3-postinstall_docker.sh --server-ip x.x.x.x
 To create and configure everything in a single step:
 
 ```bash
-chmod +x deploy/1-provision/all.sh
-deploy/1-provision/all.sh --ssh-port 22 --ssh-key-path ~/.ssh/id_rsa
+chmod +x scripts/1-provision/all.sh
+scripts/1-provision/all.sh --ssh-port 22 --ssh-key-path ~/.ssh/id_rsa
 ```
 
 And to rollback/reverse configurations:
 
 ```bash
-deploy/1-provision/all.sh --rollback [--keep-server]
+scripts/1-provision/all.sh --rollback [--keep-server]
 ```
 
 Similarly, for Docker:
 
 ```bash
-chmod +x deploy/2-docker/all.sh
-deploy/2-docker/all.sh --server-ip x.x.x.x
+chmod +x scripts/2-docker/all.sh
+scripts/2-docker/all.sh --server-ip x.x.x.x
 # Complete rollback of Docker:
-deploy/2-docker/all.sh --server-ip x.x.x.x --rollback
+scripts/2-docker/all.sh --server-ip x.x.x.x --rollback
 ```
 
 ---
