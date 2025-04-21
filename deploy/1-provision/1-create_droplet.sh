@@ -3,8 +3,6 @@ set -euo pipefail
 
 # 1-create_droplet.sh
 #
-# Idempotent Droplet creation & rollback using doctl
-#
 # Usage:
 #   chmod +x 1-create_droplet.sh
 #   ./1-create_droplet.sh [--droplet-name NAME] [--region SLUG] [--size SLUG] [--image SLUG] [--tag TAG] [--rollback] [-h | --help]
